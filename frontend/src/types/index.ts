@@ -1,0 +1,53 @@
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: 'ADMIN' | 'AGENT';
+}
+
+export interface Traveler {
+    id: string;
+    bookingId: string;
+    name: string;
+    phoneNumber?: string;
+    email?: string;
+    country?: string;
+    travelDate?: string;
+    dob?: string;
+    anniversary?: string;
+}
+
+export interface Comment {
+    id: string;
+    bookingId: string;
+    text: string;
+    createdBy: User;
+    createdById: string;
+    createdAt: string;
+}
+
+export interface Booking {
+    id: string;
+    createdOn: string;
+    contactPerson: string;
+    contactNumber: string;
+    requirements?: string;
+    status: 'Pending' | 'Working' | 'Sent' | 'Booked';
+    assignedToUser?: User;
+    assignedToUserId?: string;
+    createdByUser: User;
+    createdByUserId: string;
+    isConvertedToEDT: boolean;
+    travelers: Traveler[];
+    comments: Comment[];
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
