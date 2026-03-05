@@ -52,7 +52,14 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            travelers: [{ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' }],
+            travelers: [{
+                name: '',
+                phoneNumber: '',
+                email: '',
+                country: '',
+                flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '',
+                travelDate: '', dob: '', anniversary: '',
+            }],
         },
     });
 
@@ -61,18 +68,24 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
         name: 'travelers',
     });
 
-    // Reset form when booking changes or modal opens
+    // Pre-fill the first traveler with booking contact info
     React.useEffect(() => {
-        if (isOpen) {
+        if (isOpen && booking) {
             reset({
-                travelers: [{ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' }],
+                travelers: [{
+                    name: booking.contactPerson || '',
+                    phoneNumber: booking.contactNumber || '',
+                    email: '',
+                    country: '',
+                    flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '',
+                    travelDate: '', dob: '', anniversary: '',
+                }],
             });
         }
-    }, [isOpen, reset]);
+    }, [isOpen, booking, reset]);
 
     const mutation = useMutation({
         mutationFn: async (data: FormValues) => {
-            // Send array directly
             await api.post(`/bookings/${booking?.id}/travelers`, data.travelers);
         },
         onSuccess: () => {
@@ -94,14 +107,19 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Add Traveler Details</DialogTitle>
+                    <p className="text-xs text-slate-500 mt-1">
+                        Primary traveler is pre-filled from booking. Add flight info, dates &amp; other members below.
+                    </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
                     {fields.map((field, index) => (
                         <div key={field.id} className="p-4 bg-slate-50 border border-slate-200 rounded-lg relative">
                             <div className="flex justify-between items-center mb-4">
-                                <h4 className="font-medium text-slate-800">Traveler {index + 1}</h4>
-                                {fields.length > 1 && (
+                                <h4 className="font-medium text-slate-800">
+                                    {index === 0 ? '✈ Primary Traveler' : `Additional Member ${index}`}
+                                </h4>
+                                {fields.length > 1 && index > 0 && (
                                     <button
                                         type="button"
                                         onClick={() => remove(index)}
@@ -113,48 +131,21 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Name — read-only for primary, editable for additional members */}
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">Full Name *</label>
                                     <input
                                         {...register(`travelers.${index}.name` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        placeholder="John Doe"
+                                        className={`w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm ${index === 0 ? 'bg-slate-100 text-slate-600' : ''}`}
+                                        placeholder="Full name"
+                                        readOnly={index === 0}
                                     />
                                     {errors.travelers?.[index]?.name && (
                                         <p className="text-red-500 text-xs mt-1">{errors.travelers[index]?.name?.message}</p>
                                     )}
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Phone Number</label>
-                                    <input
-                                        {...register(`travelers.${index}.phoneNumber` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        placeholder="+1 234 567 890"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Email</label>
-                                    <input
-                                        {...register(`travelers.${index}.email` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        placeholder="john@example.com"
-                                    />
-                                    {errors.travelers?.[index]?.email && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.travelers[index]?.email?.message}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Country</label>
-                                    <input
-                                        {...register(`travelers.${index}.country` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        placeholder="Search country..."
-                                    />
-                                </div>
-
+                                {/* Flight From / To */}
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <label className="block text-xs font-medium text-slate-700 mb-1">Flight From</label>
@@ -174,25 +165,25 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Departure</label>
-                                        <input
-                                            type="datetime-local"
-                                            {...register(`travelers.${index}.departureTime` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Arrival</label>
-                                        <input
-                                            type="datetime-local"
-                                            {...register(`travelers.${index}.arrivalTime` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        />
-                                    </div>
+                                {/* Departure / Arrival */}
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Departure Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        {...register(`travelers.${index}.departureTime` as const)}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Arrival Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        {...register(`travelers.${index}.arrivalTime` as const)}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    />
                                 </div>
 
+                                {/* Travel Date */}
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">Travel Date</label>
                                     <input
@@ -202,6 +193,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                                     />
                                 </div>
 
+                                {/* DOB / Anniversary */}
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <label className="block text-xs font-medium text-slate-700 mb-1">DOB</label>
