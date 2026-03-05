@@ -57,25 +57,45 @@ export const BookingsTable: React.FC<BookingsTableProps> = ({ statusFilter, isED
             header: 'Contact Number',
         }),
         columnHelper.accessor('requirements', {
-            header: 'Requirements',
+            header: 'Requirements & Flight Info',
             cell: (info) => {
-                const val = info.getValue() || 'View Details';
+                const val = info.getValue() || 'No specific requirements.';
                 const travelers = info.row.original.travelers;
                 const bookingId = info.row.original.id;
 
+                let summary = '';
+                if (travelers && travelers.length > 0) {
+                    const primary = travelers[0];
+                    const numOthers = travelers.length - 1;
+                    const othersText = numOthers > 0 ? ` alongside ${numOthers} other passenger${numOthers > 1 ? 's' : ''}` : '';
+
+                    if (primary.flightFrom || primary.flightTo) {
+                        const from = primary.flightFrom || 'TBD';
+                        const to = primary.flightTo || 'TBD';
+                        const dep = primary.departureTime ? dayjs(primary.departureTime).format('MMM DD, h:mm A') : 'TBD';
+                        const arr = primary.arrivalTime ? dayjs(primary.arrivalTime).format('MMM DD, h:mm A') : 'TBD';
+                        summary = `Primary traveler ${primary.name} is flying from ${from} to ${to}${othersText}. Departure is scheduled for ${dep} with arrival at ${arr}.`;
+                    } else if (primary.travelDate) {
+                        summary = `Primary traveler ${primary.name} is traveling to ${primary.country || 'unspecified location'} on ${dayjs(primary.travelDate).format('MMM DD, YYYY')}${othersText}. Flight schedules are currently TBD.`;
+                    }
+                }
+
                 return (
-                    <Link to={`/bookings/${bookingId}`} className="group flex flex-col gap-1.5 hover:bg-slate-50 p-2 -m-2 rounded-md transition-colors block w-full outline-none focus:ring-2 focus:ring-indigo-500">
-                        <span className="tooltip truncate max-w-[150px] inline-block text-indigo-600 font-medium group-hover:text-indigo-800 underline decoration-indigo-200 decoration-1 underline-offset-2" title={val}>
+                    <div className="flex flex-col gap-2 min-w-[300px] max-w-[400px] py-1 text-sm">
+                        <span className="text-slate-800 font-medium whitespace-normal line-clamp-2" title={val}>
                             {val}
                         </span>
-                        {travelers && travelers.length > 0 && (
-                            <div className="text-[11px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded-md self-start truncate max-w-[150px]" title={travelers.map(t => `${t.name} (${t.travelDate || 'TBD'})`).join(', ')}>
-                                ✈ {travelers[0].travelDate ? dayjs(travelers[0].travelDate).format('MMM DD, YYYY') : 'Data needed'}
-                                {travelers[0].country ? ` • ${travelers[0].country}` : ''}
-                                {travelers.length > 1 ? ` (+${travelers.length - 1})` : ''}
+                        {summary ? (
+                            <div className="text-xs text-indigo-800 bg-indigo-50/70 p-2.5 rounded-md border border-indigo-100 leading-relaxed whitespace-normal mt-1">
+                                <span className="font-semibold block mb-1">✈ Flight Summary:</span>
+                                {summary}
                             </div>
+                        ) : (
+                            <Link to={`/bookings/${bookingId}`} className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline inline-block mt-1">
+                                No flight data. Click to view or add details &rarr;
+                            </Link>
                         )}
-                    </Link>
+                    </div>
                 );
             },
         }),
