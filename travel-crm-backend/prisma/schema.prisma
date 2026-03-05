@@ -64,9 +64,13 @@ model Traveler {
   name        String
   phoneNumber String?
   email       String?
-  country     String?
-  travelDate  String?
-  dob         String?
-  anniversary String?
-  isPrimary   Boolean  @default(false)
+  country       String?
+  flightFrom    String?
+  flightTo      String?
+  departureTime String?
+  arrivalTime   String?
+  travelDate    String?
+  dob           String?
+  anniversary   String?
+  isPrimary     Boolean  @default(false)
 }

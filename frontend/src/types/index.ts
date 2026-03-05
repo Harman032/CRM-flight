@@ -12,6 +12,10 @@ export interface Traveler {
     phoneNumber?: string;
     email?: string;
     country?: string;
+    flightFrom?: string;
+    flightTo?: string;
+    departureTime?: string;
+    arrivalTime?: string;
     travelDate?: string;
     dob?: string;
     anniversary?: string;

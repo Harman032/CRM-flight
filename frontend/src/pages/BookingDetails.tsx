@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/client';
 import dayjs from 'dayjs';
-import { ArrowLeft, User, Phone, Mail, Calendar, MapPin, MessageSquare, Clock } from 'lucide-react';
+import { ArrowLeft, User, Phone, Mail, Calendar, MapPin, MessageSquare, Clock, Plane } from 'lucide-react';
 
 export const BookingDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -51,9 +51,9 @@ export const BookingDetails: React.FC = () => {
                 </div>
                 <div className="flex space-x-3">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${booking.status === 'Booked' ? 'bg-green-100 text-green-800' :
-                            booking.status === 'Working' ? 'bg-purple-100 text-purple-800' :
-                                booking.status === 'Sent' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-blue-100 text-blue-800'
+                        booking.status === 'Working' ? 'bg-purple-100 text-purple-800' :
+                            booking.status === 'Sent' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-blue-100 text-blue-800'
                         }`}>
                         {booking.status}
                     </span>
@@ -108,6 +108,18 @@ export const BookingDetails: React.FC = () => {
                                                 <div className="flex items-center space-x-2">
                                                     <MapPin size={14} className="text-slate-400" />
                                                     <span>{traveler.country}</span>
+                                                </div>
+                                            )}
+                                            {(traveler.flightFrom || traveler.flightTo) && (
+                                                <div className="flex items-start space-x-2 bg-indigo-50/70 p-2.5 rounded border border-indigo-100/50 mt-2">
+                                                    <Plane size={14} className="text-indigo-500 mt-0.5 shrink-0" />
+                                                    <div className="text-xs text-indigo-900 space-y-0.5">
+                                                        <div className="font-semibold mb-1">
+                                                            {traveler.flightFrom || 'TBD'} &rarr; {traveler.flightTo || 'TBD'}
+                                                        </div>
+                                                        {traveler.departureTime && <div><span className="text-indigo-600/70 font-medium">Departs:</span> {dayjs(traveler.departureTime).format('MMM DD, h:mm A')}</div>}
+                                                        {traveler.arrivalTime && <div><span className="text-indigo-600/70 font-medium">Arrives:</span> {dayjs(traveler.arrivalTime).format('MMM DD, h:mm A')}</div>}
+                                                    </div>
                                                 </div>
                                             )}
                                             {traveler.travelDate && (

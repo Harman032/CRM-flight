@@ -19,6 +19,10 @@ const travelerSchema = z.object({
     phoneNumber: z.string().optional(),
     email: z.string().email('Invalid email').optional().or(z.literal('')),
     country: z.string().optional(),
+    flightFrom: z.string().optional(),
+    flightTo: z.string().optional(),
+    departureTime: z.string().optional(),
+    arrivalTime: z.string().optional(),
     travelDate: z.string().optional(),
     dob: z.string().optional(),
     anniversary: z.string().optional(),
@@ -48,7 +52,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            travelers: [{ name: '', phoneNumber: '', email: '', country: '', travelDate: '', dob: '', anniversary: '' }],
+            travelers: [{ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' }],
         },
     });
 
@@ -61,7 +65,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
     React.useEffect(() => {
         if (isOpen) {
             reset({
-                travelers: [{ name: '', phoneNumber: '', email: '', country: '', travelDate: '', dob: '', anniversary: '' }],
+                travelers: [{ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' }],
             });
         }
     }, [isOpen, reset]);
@@ -151,6 +155,44 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                                     />
                                 </div>
 
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-700 mb-1">Flight From</label>
+                                        <input
+                                            {...register(`travelers.${index}.flightFrom` as const)}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                            placeholder="JFK"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-700 mb-1">Flight To</label>
+                                        <input
+                                            {...register(`travelers.${index}.flightTo` as const)}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                            placeholder="LHR"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-700 mb-1">Departure</label>
+                                        <input
+                                            type="datetime-local"
+                                            {...register(`travelers.${index}.departureTime` as const)}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-700 mb-1">Arrival</label>
+                                        <input
+                                            type="datetime-local"
+                                            {...register(`travelers.${index}.arrivalTime` as const)}
+                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        />
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">Travel Date</label>
                                     <input
@@ -184,7 +226,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
 
                     <button
                         type="button"
-                        onClick={() => append({ name: '', phoneNumber: '', email: '', country: '', travelDate: '', dob: '', anniversary: '' })}
+                        onClick={() => append({ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' })}
                         className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-700 font-medium text-sm transition-colors w-full justify-center p-3 border border-dashed border-indigo-300 bg-indigo-50 rounded-lg hover:bg-indigo-100"
                     >
                         <Plus size={16} />
