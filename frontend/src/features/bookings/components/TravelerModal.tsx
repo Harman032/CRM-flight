@@ -16,20 +16,13 @@ import { Plus, Trash2 } from 'lucide-react';
 
 const travelerSchema = z.object({
     name: z.string().min(1, 'Name is required'),
-    phoneNumber: z.string().optional(),
     email: z.string().email('Invalid email').optional().or(z.literal('')),
-    country: z.string().optional(),
-    flightFrom: z.string().optional(),
-    flightTo: z.string().optional(),
-    departureTime: z.string().optional(),
-    arrivalTime: z.string().optional(),
-    travelDate: z.string().optional(),
     dob: z.string().optional(),
     anniversary: z.string().optional(),
 });
 
 const formSchema = z.object({
-    travelers: z.array(travelerSchema).min(1, 'At least one traveler is required'),
+    travelers: z.array(travelerSchema).min(1, 'At least one member is required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -52,14 +45,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            travelers: [{
-                name: '',
-                phoneNumber: '',
-                email: '',
-                country: '',
-                flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '',
-                travelDate: '', dob: '', anniversary: '',
-            }],
+            travelers: [{ name: '', email: '', dob: '', anniversary: '' }],
         },
     });
 
@@ -68,21 +54,14 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
         name: 'travelers',
     });
 
-    // Pre-fill the first traveler with booking contact info
+    // Reset form when booking changes or modal opens
     React.useEffect(() => {
-        if (isOpen && booking) {
+        if (isOpen) {
             reset({
-                travelers: [{
-                    name: booking.contactPerson || '',
-                    phoneNumber: booking.contactNumber || '',
-                    email: '',
-                    country: '',
-                    flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '',
-                    travelDate: '', dob: '', anniversary: '',
-                }],
+                travelers: [{ name: '', email: '', dob: '', anniversary: '' }],
             });
         }
-    }, [isOpen, booking, reset]);
+    }, [isOpen, reset]);
 
     const mutation = useMutation({
         mutationFn: async (data: FormValues) => {
@@ -90,11 +69,11 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
-            toast.success('Travelers added successfully');
+            toast.success('Members added successfully');
             onClose();
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to add travelers');
+            toast.error(error.response?.data?.message || 'Failed to add members');
         },
     });
 
@@ -104,22 +83,17 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Add Traveler Details</DialogTitle>
-                    <p className="text-xs text-slate-500 mt-1">
-                        Primary traveler is pre-filled from booking. Add flight info, dates &amp; other members below.
-                    </p>
+                    <DialogTitle>Add Member Details</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
                     {fields.map((field, index) => (
                         <div key={field.id} className="p-4 bg-slate-50 border border-slate-200 rounded-lg relative">
                             <div className="flex justify-between items-center mb-4">
-                                <h4 className="font-medium text-slate-800">
-                                    {index === 0 ? '✈ Primary Traveler' : `Additional Member ${index}`}
-                                </h4>
-                                {fields.length > 1 && index > 0 && (
+                                <h4 className="font-medium text-slate-800">Member {index + 1}</h4>
+                                {fields.length > 1 && (
                                     <button
                                         type="button"
                                         onClick={() => remove(index)}
@@ -131,86 +105,46 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Name — read-only for primary, editable for additional members */}
                                 <div>
                                     <label className="block text-xs font-medium text-slate-700 mb-1">Full Name *</label>
                                     <input
                                         {...register(`travelers.${index}.name` as const)}
-                                        className={`w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm ${index === 0 ? 'bg-slate-100 text-slate-600' : ''}`}
-                                        placeholder="Full name"
-                                        readOnly={index === 0}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        placeholder="John Doe"
                                     />
                                     {errors.travelers?.[index]?.name && (
                                         <p className="text-red-500 text-xs mt-1">{errors.travelers[index]?.name?.message}</p>
                                     )}
                                 </div>
 
-                                {/* Flight From / To */}
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Flight From</label>
-                                        <input
-                                            {...register(`travelers.${index}.flightFrom` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                            placeholder="JFK"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Flight To</label>
-                                        <input
-                                            {...register(`travelers.${index}.flightTo` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                            placeholder="LHR"
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                                    <input
+                                        {...register(`travelers.${index}.email` as const)}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        placeholder="john@example.com"
+                                    />
+                                    {errors.travelers?.[index]?.email && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.travelers[index]?.email?.message}</p>
+                                    )}
                                 </div>
 
-                                {/* Departure / Arrival */}
                                 <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Departure Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        {...register(`travelers.${index}.departureTime` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Arrival Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        {...register(`travelers.${index}.arrivalTime` as const)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                    />
-                                </div>
-
-                                {/* Travel Date */}
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 mb-1">Travel Date</label>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Date of Birth</label>
                                     <input
                                         type="date"
-                                        {...register(`travelers.${index}.travelDate` as const)}
+                                        {...register(`travelers.${index}.dob` as const)}
                                         className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                                     />
                                 </div>
 
-                                {/* DOB / Anniversary */}
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">DOB</label>
-                                        <input
-                                            type="date"
-                                            {...register(`travelers.${index}.dob` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Anniversary</label>
-                                        <input
-                                            type="date"
-                                            {...register(`travelers.${index}.anniversary` as const)}
-                                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-700 mb-1">Anniversary</label>
+                                    <input
+                                        type="date"
+                                        {...register(`travelers.${index}.anniversary` as const)}
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -218,7 +152,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
 
                     <button
                         type="button"
-                        onClick={() => append({ name: '', phoneNumber: '', email: '', country: '', flightFrom: '', flightTo: '', departureTime: '', arrivalTime: '', travelDate: '', dob: '', anniversary: '' })}
+                        onClick={() => append({ name: '', email: '', dob: '', anniversary: '' })}
                         className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-700 font-medium text-sm transition-colors w-full justify-center p-3 border border-dashed border-indigo-300 bg-indigo-50 rounded-lg hover:bg-indigo-100"
                     >
                         <Plus size={16} />
@@ -238,7 +172,7 @@ export const TravelerModal: React.FC<TravelerModalProps> = ({ booking, isOpen, o
                             disabled={mutation.isPending}
                             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors"
                         >
-                            Save Travelers
+                            Save Members
                         </button>
                     </div>
                 </form>
