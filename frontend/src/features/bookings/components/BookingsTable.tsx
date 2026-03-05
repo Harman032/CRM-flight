@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../../api/client';
 import type { Booking } from '../../../types';
 import dayjs from 'dayjs';
+import { Link } from 'react-router-dom';
 import { CommentModal } from './CommentModal';
 import { ActionDropdown } from './ActionDropdown';
 import { StatusUpdateModal } from './StatusUpdateModal';
@@ -58,18 +59,15 @@ export const BookingsTable: React.FC<BookingsTableProps> = ({ statusFilter, isED
         columnHelper.accessor('requirements', {
             header: 'Requirements',
             cell: (info) => {
-                const val = info.getValue();
+                const val = info.getValue() || 'View Details';
                 const travelers = info.row.original.travelers;
+                const bookingId = info.row.original.id;
 
                 return (
-                    <div className="flex flex-col gap-1.5">
-                        {val ? (
-                            <span className="tooltip truncate max-w-[150px] inline-block" title={val}>
-                                {val}
-                            </span>
-                        ) : (
-                            <span className="text-slate-400 italic">None</span>
-                        )}
+                    <Link to={`/bookings/${bookingId}`} className="group flex flex-col gap-1.5 hover:bg-slate-50 p-2 -m-2 rounded-md transition-colors block w-full outline-none focus:ring-2 focus:ring-indigo-500">
+                        <span className="tooltip truncate max-w-[150px] inline-block text-indigo-600 font-medium group-hover:text-indigo-800 underline decoration-indigo-200 decoration-1 underline-offset-2" title={val}>
+                            {val}
+                        </span>
                         {travelers && travelers.length > 0 && (
                             <div className="text-[11px] text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded-md self-start truncate max-w-[150px]" title={travelers.map(t => `${t.name} (${t.travelDate || 'TBD'})`).join(', ')}>
                                 ✈ {travelers[0].travelDate ? dayjs(travelers[0].travelDate).format('MMM DD, YYYY') : 'Data needed'}
@@ -77,7 +75,7 @@ export const BookingsTable: React.FC<BookingsTableProps> = ({ statusFilter, isED
                                 {travelers.length > 1 ? ` (+${travelers.length - 1})` : ''}
                             </div>
                         )}
-                    </div>
+                    </Link>
                 );
             },
         }),
