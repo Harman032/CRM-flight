@@ -6,7 +6,8 @@
         "dev:backend": "cd travel-crm-backend && npm run dev",
         "dev:frontend": "cd frontend && npm run dev",
         "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-        "build": "cd travel-crm-backend && npm run build && cd ../frontend && npm run build",
+        "build": "cd travel-crm-backend && npm install && npm run build",
+        "start": "cd travel-crm-backend && npm run start",
         "prisma:generate": "cd travel-crm-backend && npx prisma generate",
         "prisma:migrate": "cd travel-crm-backend && npx prisma migrate dev",
         "seed": "cd travel-crm-backend && npm run seed"
