@@ -4,15 +4,15 @@
   "description": "Travel Booking CRM Backend",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
+    "dev": "npx ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "npx tsc",
     "start": "node dist/server.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "seed": "prisma db seed"
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev",
+    "seed": "npx prisma db seed"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "npx ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
