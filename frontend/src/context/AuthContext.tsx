@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '../types';
-import { jwtDecode } from 'jwt-decode';
 
 interface AuthContextType {
     token: string | null;
@@ -19,8 +18,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         if (token) {
             try {
-                const decoded: any = jwtDecode(token);
-                setUser({ id: decoded.id, name: decoded.name, email: decoded.email, role: decoded.role });
+                // Decode the mock base64 token (format: header.payload.signature)
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                setUser({ id: payload.id, name: payload.name, email: payload.email, role: payload.role });
             } catch (e) {
                 setToken(null);
                 localStorage.removeItem('token');
