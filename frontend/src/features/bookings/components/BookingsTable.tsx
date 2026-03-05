@@ -9,7 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../../api/client';
 import type { Booking } from '../../../types';
 import dayjs from 'dayjs';
-import { Link } from 'react-router-dom';
 import { CommentModal } from './CommentModal';
 import { ActionDropdown } from './ActionDropdown';
 import { StatusUpdateModal } from './StatusUpdateModal';
@@ -61,7 +60,6 @@ export const BookingsTable: React.FC<BookingsTableProps> = ({ statusFilter, isED
             cell: (info) => {
                 const val = info.getValue() || 'No specific requirements.';
                 const travelers = info.row.original.travelers;
-                const bookingId = info.row.original.id;
 
                 let summary = '';
                 if (travelers && travelers.length > 0) {
@@ -91,9 +89,9 @@ export const BookingsTable: React.FC<BookingsTableProps> = ({ statusFilter, isED
                                 {summary}
                             </div>
                         ) : (
-                            <Link to={`/bookings/${bookingId}`} className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline inline-block mt-1">
-                                No flight data. Click to view or add details &rarr;
-                            </Link>
+                            <span className="text-xs text-slate-400 italic inline-block mt-1">
+                                No flight data available.
+                            </span>
                         )}
                     </div>
                 );
