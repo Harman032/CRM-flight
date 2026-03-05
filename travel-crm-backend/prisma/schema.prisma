@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -32,7 +32,7 @@ model Booking {
   
   contactPerson      String
   contactNumber      String
-  requirements       String?
+  requirements       String?       @db.Text
   
   assignedToUserId   String?
   assignedToUser     User?         @relation("AssignedAgent", fields: [assignedToUserId], references: [id])
@@ -53,17 +53,17 @@ model Comment {
   booking     Booking  @relation(fields: [bookingId], references: [id])
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])
-  text        String
+  text        String   @db.Text
   createdAt   DateTime @default(now())
 }
 
 model Traveler {
-  id          String   @id @default(uuid())
-  bookingId   String
-  booking     Booking  @relation(fields: [bookingId], references: [id])
-  name        String
-  phoneNumber String?
-  email       String?
+  id            String   @id @default(uuid())
+  bookingId     String
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+  name          String
+  phoneNumber   String?
+  email         String?
   country       String?
   flightFrom    String?
   flightTo      String?

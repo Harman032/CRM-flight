@@ -19,11 +19,11 @@ app.use(express.json());
 // Enable CORS
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests from any localhost port (Vite may pick 5173, 5174, etc.)
-        if (!origin || origin.match(/^http:\/\/localhost:\d+$/)) {
+        // Allow requests from localhost (dev) and any Railway/Vercel domain (prod)
+        if (!origin || origin.match(/^https?:\/\/localhost:\d+$/) || origin.match(/\.up\.railway\.app$/) || origin.match(/\.vercel\.app$/)) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, true); // Allow all origins for now in production
         }
     },
     credentials: true,
